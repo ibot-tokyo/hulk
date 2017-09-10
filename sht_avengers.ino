@@ -34,12 +34,12 @@ void loop() {
     int arrInt = i - 2;
 
     if (pin) {
-//      Serial.println("========================pin: " 
-//        + (String)pin 
-//        + ", i=" 
-//        + (String)i 
-//        + ", j=" 
-//        + (String)j);
+　     Serial.println("========================pin: " 
+        + (String)pin 
+        + ", i=" 
+        + (String)i 
+        + ", j=" 
+        + (String)j);
         
       if (!arr[arrInt]) {
 
@@ -54,22 +54,22 @@ void loop() {
         }
         arr[arrInt] = true;
 
-        //Serial.println((String)j + ": high");
+        Serial.println((String)j + ": high");
       }
     
     } else {
-//      Serial.println(
-//        "------------------------pin: " 
-//        + (String)pin 
-//        + ", i=" 
-//        + (String)i 
-//        + ", j=" 
-//        + (String)j);
+      Serial.println(
+        "------------------------pin: " 
+        + (String)pin 
+        + ", i=" 
+        + (String)i 
+        + ", j=" 
+        + (String)j);
         
       if (arr[arrInt]) {
          digitalWrite(j, LOW);
          arr[arrInt] = false;
-         //Serial.println((String)j + ": low");
+         Serial.println((String)j + ": low");
       }
     }
   }
@@ -91,7 +91,7 @@ void loop() {
       if (!arrLift[arrLiftInt]) {
         
         int speed = 200;
-        if (x == 151) {
+        if (x == 15) {
           analogWrite(z, speed);  //pwm
         } else {
           digitalWrite(z, HIGH);
