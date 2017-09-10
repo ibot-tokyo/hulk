@@ -74,7 +74,6 @@ void loop() {
     }
   }
 
-  boolean outPin = false;
   for (int x = 14; x < 16; x++) {
     int pin = digitalRead(x);
     int z = x + 2;
