@@ -20,6 +20,8 @@ const int OUTPUT_C2 = 13;
 const int OUTPUT_L1 = 16;
 const int OUTPUT_L2 = 17;
 
+const int PWM_SPEED = 200;
+
 void setup() {
   Serial.begin(9600);
   
@@ -38,7 +40,6 @@ void setup() {
   pinMode(OUTPUT_B2, OUTPUT);
   pinMode(OUTPUT_C1, OUTPUT);
   pinMode(OUTPUT_C2, OUTPUT);
-
   pinMode(OUTPUT_L1, OUTPUT);
   pinMode(OUTPUT_L2, OUTPUT);
 
@@ -53,12 +54,15 @@ void loop() {
   String readC = read("readC", INPUT_C1, INPUT_C2);
   String readL = read("readL", INPUT_L1, INPUT_L2);
   
-  send(readA, INPUT_A1, INPUT_A2);
-  send(readB, INPUT_B1, INPUT_B2);
-  send(readC, INPUT_C1, INPUT_C2);
-  send(readL, OUTPUT_L1, OUTPUT_L2);
+  delay(5);
 
-  delay(10);
+  send(readA, OUTPUT_A1, OUTPUT_A2, true);
+  send(readB, OUTPUT_B1, OUTPUT_B2, true);
+  send(readC, OUTPUT_C1, OUTPUT_C2, true);
+  send(readL, OUTPUT_L1, OUTPUT_L2, false);
+
+  delay(5);
+  // delay(1000);
 }
 
 String read(String label, int v1, int v2) {
@@ -79,16 +83,28 @@ String read(String label, int v1, int v2) {
   return state;
 }
 
-void send(String state, int out1, int out2) {
+void send(String state, int out1, int out2, bool isPwm) {
   if (state == "forward") {
+    // pwm
+    if (isPwm) {
+      analogWrite(out2, PWM_SPEED);
+    } else {
+      digitalWrite(out2, HIGH);
+    }
+    // dir
     digitalWrite(out1, HIGH);
-    digitalWrite(out2, HIGH);
     return;
   }
   
   if (state == "reverse") {
+    // pwm
+    if (isPwm) {
+      analogWrite(out2, PWM_SPEED);
+    } else {
+      digitalWrite(out2, HIGH);
+    }
+    // dir
     digitalWrite(out1, LOW);
-    digitalWrite(out2, HIGH);
     return;
   }
 
