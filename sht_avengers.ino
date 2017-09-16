@@ -46,20 +46,38 @@ void setup() {
   Serial.println("Start...");
 }
 
+String readA = "stop";
+String readB = "stop";
+String readC = "stop";
+String readL = "stop";
+
+
 void loop() {
   Serial.println("=====");
 
-  String readA = read("readA", INPUT_A1, INPUT_A2);
-  String readB = read("readB", INPUT_B1, INPUT_B2);
-  String readC = read("readC", INPUT_C1, INPUT_C2);
-  String readL = read("readL", INPUT_L1, INPUT_L2);
+  String newReadA = read("readA", INPUT_A1, INPUT_A2);
+  String newReadB = read("readB", INPUT_B1, INPUT_B2);
+  String newReadC = read("readC", INPUT_C1, INPUT_C2);
+  String newReadL = read("readL", INPUT_L1, INPUT_L2);
   
   delay(5);
 
-  send(readA, OUTPUT_A1, OUTPUT_A2, true);
-  send(readB, OUTPUT_B1, OUTPUT_B2, true);
-  send(readC, OUTPUT_C1, OUTPUT_C2, true);
-  send(readL, OUTPUT_L1, OUTPUT_L2, false);
+  if (readA != newReadA) {
+    readA = newReadA;
+    send(readA, OUTPUT_A1, OUTPUT_A2, true);
+  }
+  if (readB != newReadB) {
+    readB = newReadB;
+    send(readB, OUTPUT_B1, OUTPUT_B2, true);
+  }
+  if (readC != newReadC) {
+    readC = newReadC;
+    send(readC, OUTPUT_C1, OUTPUT_C2, true);
+  }
+  if (readL != newReadL) {
+    readL = newReadL;
+    send(readL, OUTPUT_L1, OUTPUT_L2, false);
+  }
 
   delay(5);
   // delay(1000);
