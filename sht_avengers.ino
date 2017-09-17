@@ -1,121 +1,131 @@
+// RaspberryPi Tire Inputs
+const int INPUT_A1 = 2;
+const int INPUT_A2 = 3;
+const int INPUT_B1 = 4;
+const int INPUT_B2 = 5;
+const int INPUT_C1 = 6;
+const int INPUT_C2 = 7;
+// Lifter Inputs
+const int INPUT_L1 = 14;
+const int INPUT_L2 = 15;
+
+// Tire MoterDriver Outputs
+const int OUTPUT_A1 = 8;
+const int OUTPUT_A2 = 9;
+const int OUTPUT_B1 = 10;
+const int OUTPUT_B2 = 11;
+const int OUTPUT_C1 = 12;
+const int OUTPUT_C2 = 13;
+// Lifter MoterDriver Outputs
+const int OUTPUT_L1 = 16;
+const int OUTPUT_L2 = 17;
+
+const int PWM_SPEED = 200;
+
 void setup() {
   Serial.begin(9600);
   
-  pinMode(2, INPUT);
-  pinMode(3, INPUT);
-  pinMode(4, INPUT);
-  pinMode(5, INPUT);
-  pinMode(6, INPUT);
-  pinMode(7, INPUT);
+  pinMode(INPUT_A1, INPUT);
+  pinMode(INPUT_A2, INPUT);
+  pinMode(INPUT_B1, INPUT);
+  pinMode(INPUT_B2, INPUT);
+  pinMode(INPUT_C1, INPUT);
+  pinMode(INPUT_C2, INPUT);
+  pinMode(INPUT_L1, INPUT);
+  pinMode(INPUT_L2, INPUT);
 
-  pinMode(8, OUTPUT);
-  pinMode(9, OUTPUT);
-  pinMode(10, OUTPUT);
-  pinMode(11, OUTPUT);
-  pinMode(12, OUTPUT);
-  pinMode(13, OUTPUT);
+  pinMode(OUTPUT_A1, OUTPUT);
+  pinMode(OUTPUT_A2, OUTPUT);
+  pinMode(OUTPUT_B1, OUTPUT);
+  pinMode(OUTPUT_B2, OUTPUT);
+  pinMode(OUTPUT_C1, OUTPUT);
+  pinMode(OUTPUT_C2, OUTPUT);
+  pinMode(OUTPUT_L1, OUTPUT);
+  pinMode(OUTPUT_L2, OUTPUT);
 
-  pinMode(14, INPUT);
-  pinMode(15, INPUT);
-
-  pinMode(16, OUTPUT);
-  pinMode(17, OUTPUT);
-
-  Serial.println("Start..");
+  Serial.println("Start...");
 }
 
-int arr[6]={ false, false, false, false, false, false };
-int arrLift[2]={ false, false };
+String readA = "stop";
+String readB = "stop";
+String readC = "stop";
+String readL = "stop";
+
 
 void loop() {
-  for (int i = 2; i < 8; i++) {
-    int pin = digitalRead(i);
-    int j = i + 6;
-    int arrInt = i - 2;
+  Serial.println("=====");
 
-    if (pin) {
-　     Serial.println("========================pin: " 
-        + (String)pin 
-        + ", i=" 
-        + (String)i 
-        + ", j=" 
-        + (String)j);
-        
-      if (!arr[arrInt]) {
+  String newReadA = read("readA", INPUT_A1, INPUT_A2);
+  String newReadB = read("readB", INPUT_B1, INPUT_B2);
+  String newReadC = read("readC", INPUT_C1, INPUT_C2);
+  String newReadL = read("readL", INPUT_L1, INPUT_L2);
+  
+  delay(5);
 
-        int speed = 200;
-        if (i == 3 || i == 5) {
-          analogWrite(j, speed);  //pwm
-        } else if (i == 6) {
-          Serial.println("yoko");
-          analogWrite(j, speed);  //pwm
-        } else {
-          digitalWrite(j, HIGH);
-        }
-        arr[arrInt] = true;
-
-        Serial.println((String)j + ": high");
-      }
-    
-    } else {
-      Serial.println(
-        "------------------------pin: " 
-        + (String)pin 
-        + ", i=" 
-        + (String)i 
-        + ", j=" 
-        + (String)j);
-        
-      if (arr[arrInt]) {
-         digitalWrite(j, LOW);
-         arr[arrInt] = false;
-         Serial.println((String)j + ": low");
-      }
-    }
+  if (readA != newReadA) {
+    readA = newReadA;
+    send(readA, OUTPUT_A1, OUTPUT_A2, true);
+  }
+  if (readB != newReadB) {
+    readB = newReadB;
+    send(readB, OUTPUT_B1, OUTPUT_B2, true);
+  }
+  if (readC != newReadC) {
+    readC = newReadC;
+    send(readC, OUTPUT_C1, OUTPUT_C2, true);
+  }
+  if (readL != newReadL) {
+    readL = newReadL;
+    send(readL, OUTPUT_L1, OUTPUT_L2, false);
   }
 
-  for (int x = 14; x < 16; x++) {
-    int pin = digitalRead(x);
-    int z = x + 2;
-    int arrLiftInt = x - 14;
+  delay(5);
+  // delay(1000);
+}
 
-    if (pin) {
-      Serial.println("======================*pin: " 
-        + (String)pin 
-        + ", i=" 
-        + (String)x
-        + ", j=" 
-        + (String)z);
-        
-      if (!arrLift[arrLiftInt]) {
-        
-        int speed = 200;
-        if (x == 15) {
-          analogWrite(z, speed);  //pwm
-        } else {
-          digitalWrite(z, HIGH);
-        }
-        arrLift[arrLiftInt] = true;
+String read(String label, int v1, int v2) {
+  bool read1 = digitalRead(v1);
+  bool read2 = digitalRead(v2);
 
-        Serial.println((String)z + ": high");
-      }
-    
+  // Serial.println(label + ": " + (String)read1 + ", " + (String)read2);
+  
+  String state = "stop";
+  if (read2) {
+    if (read1) {
+      state = "forward";  // 1, 1
     } else {
-      Serial.println(
-        "-----------------------*pin: " 
-        + (String)pin 
-        + ", i=" 
-        + (String)x
-        + ", j=" 
-        + (String)z);
-        
-      if (arrLift[arrLiftInt]) {
-         digitalWrite(z, LOW);
-         arrLift[arrLiftInt] = false;
-         Serial.println((String)z + "*: low");
-      }
+      state = "reverse";  // 0, 1
     }
-    //delay(100);
-    //Serial.println("==========");
   }
+  Serial.println(label + ": " + state);
+  return state;
+}
+
+void send(String state, int out1, int out2, bool isPwm) {
+  if (state == "forward") {
+    // pwm
+    if (isPwm) {
+      analogWrite(out2, PWM_SPEED);
+    } else {
+      digitalWrite(out2, HIGH);
+    }
+    // dir
+    digitalWrite(out1, HIGH);
+    return;
+  }
+  
+  if (state == "reverse") {
+    // pwm
+    if (isPwm) {
+      analogWrite(out2, PWM_SPEED);
+    } else {
+      digitalWrite(out2, HIGH);
+    }
+    // dir
+    digitalWrite(out1, LOW);
+    return;
+  }
+
+  digitalWrite(out1, LOW);
+  digitalWrite(out2, LOW);
 }
