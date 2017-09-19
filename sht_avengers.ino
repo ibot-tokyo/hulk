@@ -21,6 +21,7 @@ const int OUTPUT_L1 = 16;
 const int OUTPUT_L2 = 17;
 
 const int PWM_SPEED = 200;
+const int STEP = 40;
 
 void setup() {
   Serial.begin(9600);
@@ -51,6 +52,9 @@ String readB = "stop";
 String readC = "stop";
 String readL = "stop";
 
+int speedA = PWM_SPEED;
+int speedB = PWM_SPEED;
+int speedC = PWM_SPEED;
 
 void loop() {
   Serial.println("=====");
@@ -60,23 +64,50 @@ void loop() {
   String newReadC = read("readC", INPUT_C1, INPUT_C2);
   String newReadL = read("readL", INPUT_L1, INPUT_L2);
   
-  delay(5);
+  // delay(5);
 
   if (readA != newReadA) {
-    readA = newReadA;
-    send(readA, OUTPUT_A1, OUTPUT_A2, true);
+    if (newReadA == "stop") {
+      if (speedA > STEP) {
+        speedA = speedA - STEP;
+      } else {
+        readA = newReadA;
+      }
+    } else {
+      readA = newReadA;
+      speedA = PWM_SPEED;
+    }
+    send(readA, speedA, OUTPUT_A1, OUTPUT_A2, true);
   }
   if (readB != newReadB) {
-    readB = newReadB;
-    send(readB, OUTPUT_B1, OUTPUT_B2, true);
+    if (newReadB == "stop") {
+      if (speedB > STEP) {
+        speedB = speedB - STEP;
+      } else {
+        readB = newReadB;
+      }
+    } else {
+      readB = newReadB;
+      speedB = PWM_SPEED;
+    }
+    send(readB, speedB, OUTPUT_B1, OUTPUT_B2, true);
   }
   if (readC != newReadC) {
-    readC = newReadC;
-    send(readC, OUTPUT_C1, OUTPUT_C2, true);
+    if (newReadC == "stop") {
+      if (speedC > STEP) {
+        speedC = speedC - STEP;
+      } else {
+        readC = newReadC;
+      }
+    } else {
+      readC = newReadC;
+      speedB = PWM_SPEED;
+    }
+    send(readC, speedC, OUTPUT_C1, OUTPUT_C2, true);
   }
   if (readL != newReadL) {
     readL = newReadL;
-    send(readL, OUTPUT_L1, OUTPUT_L2, false);
+    send(readL, 0, OUTPUT_L1, OUTPUT_L2, false);
   }
 
   delay(5);
@@ -101,11 +132,11 @@ String read(String label, int v1, int v2) {
   return state;
 }
 
-void send(String state, int out1, int out2, bool isPwm) {
+void send(String state, int speed, int out1, int out2, bool isPwm) {
   if (state == "forward") {
     // pwm
     if (isPwm) {
-      analogWrite(out2, PWM_SPEED);
+      analogWrite(out2, speed);
     } else {
       digitalWrite(out2, HIGH);
     }
@@ -117,7 +148,7 @@ void send(String state, int out1, int out2, bool isPwm) {
   if (state == "reverse") {
     // pwm
     if (isPwm) {
-      analogWrite(out2, PWM_SPEED);
+      analogWrite(out2, speed);
     } else {
       digitalWrite(out2, HIGH);
     }
